@@ -64,6 +64,8 @@ export default function PatientLogin() {
         .btn-login{display:block;width:100%;background:#fff;border:2px solid #d9b3f5;border-radius:999px;padding:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;text-align:center;margin-top:10px;transition:background .15s;}
         .btn-login:hover{background:#f0d6ff;}
         .forgot{display:inline-block;font-size:.88rem;font-weight:700;text-decoration:underline;color:#222;margin-top:14px;cursor:pointer;}
+        .alt-text{margin-top:14px;text-align:center;font-size:.92rem;color:#444;}
+        .alt-text a{color:#5a1fa0;font-weight:800;text-decoration:none;}
         a.btn-login{text-decoration:none;color:#222;}
       `}</style>
       <nav>
@@ -97,6 +99,7 @@ export default function PatientLogin() {
           <button type="submit" className="btn-login">LOGIN</button>
           <br />
           <a className="forgot" href="#">Forgot Password?</a>
+          <p className="alt-text">New here? <Link href="/signup">Sign Up</Link></p>
         </form>
       </div>
       {notifications.map(n => (

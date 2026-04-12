@@ -4,26 +4,59 @@ import Link from 'next/link';
 import ThemeToggle from '../../components/ThemeToggle';
 import { useState, useEffect } from 'react';
 
-const doctors = [
-  { id: 1, name: 'Dr. Rahul Mehta', spec: 'Cardiologist', rating: 4.9, reviews: 198, location: 'Kothrud', img: '🧑‍⚕️' },
-  { id: 2, name: 'Dr. Shravani Kalapure', spec: 'Dentist', rating: 4.1, reviews: 144, location: 'Akurdi', img: '👩‍⚕️' },
-  { id: 3, name: 'Dr. Shreya Menthe', spec: 'Dermatologist', rating: 4.2, reviews: 98, location: 'Pune', img: '👩‍⚕️' },
-  { id: 4, name: 'Dr. Abhishek Singh', spec: 'Gynecologist', rating: 4.9, reviews: 198, location: 'Aundh', img: '🧑‍⚕️' },
-];
+interface DoctorSummary {
+  _id: string;
+  name: string;
+  specialization: string;
+  experience: number;
+  location: string;
+  qualification: string;
+}
+
+interface AppointmentSummary {
+  _id: string;
+  date: string;
+  time: string;
+  status: string;
+  doctor: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function PatientDashboard() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [appointments, setAppointments] = useState([]);
-  const filteredDoctors = doctors.filter(doctor =>
+  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [doctors, setDoctors] = useState<DoctorSummary[]>([]);
+
+  const filteredDoctors = doctors.filter((doctor) =>
     doctor.name.toLowerCase().includes(search.toLowerCase()) ||
-    doctor.spec.toLowerCase().includes(search.toLowerCase())
+    doctor.specialization?.toLowerCase().includes(search.toLowerCase())
   );
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch('/api/doctors');
+        if (res.ok) {
+          const data = await res.json();
+          setDoctors(data);
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error(err.message);
+        } else {
+          console.error('Unknown error');
+        }
+      }
+    };
+
     const fetchAppointments = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
+      if (!token) return;
+      try {
         const res = await fetch('/api/appointments', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -31,11 +64,18 @@ export default function PatientDashboard() {
           const data = await res.json();
           setAppointments(data);
         }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error(err.message);
+        } else {
+          console.error('Unknown error');
+        }
       }
     };
-    fetchAppointments();
-    setTimeout(() => setLoading(false), 1000);
+
+    Promise.all([fetchDoctors(), fetchAppointments()]).finally(() => setLoading(false));
   }, []);
+
   return (
     <div>
       <style jsx>{`
@@ -133,19 +173,22 @@ export default function PatientDashboard() {
                 <div className="skeleton skeleton-btn"></div>
               </div>
             ))
-          ) : (
+          ) : filteredDoctors.length > 0 ? (
             filteredDoctors.map((doctor) => (
-              <div key={doctor.id} className="doctor-card">
-                <div className="doc-img">{doctor.img}</div>
+              <div key={doctor._id} className="doctor-card">
+                <div className="doc-img">👩‍⚕️</div>
                 <div className="doc-info">
                   <h3>{doctor.name}</h3>
-                  <div className="spec">{doctor.spec}</div>
-                  <div className="rating"><span className="star">⭐</span> {doctor.rating} ({doctor.reviews} reviews)</div>
+                  <div className="spec">{doctor.specialization}</div>
+                  <div className="rating">Experience: {doctor.experience} years</div>
                   <div className="location">📍 {doctor.location}</div>
+                  <div className="rating">{doctor.qualification}</div>
                 </div>
-                <Link href={`/doctor/${doctor.id}`} className="view-btn">View Profile</Link>
+                <Link href={`/doctor/${doctor._id}`} className="view-btn">View Profile</Link>
               </div>
             ))
+          ) : (
+            <p>No doctors found for your search.</p>
           )}
         </div>
         <div className="history-section" style={{ marginTop: '20px' }}>
@@ -165,7 +208,7 @@ export default function PatientDashboard() {
         </div>
         <div className="history-section" style={{ marginTop: '40px' }}>
           <h3>My Appointments</h3>
-          {appointments.length > 0 ? appointments.map((appt: any) => (
+          {appointments.length > 0 ? appointments.map((appt) => (
             <div key={appt._id} className="history-item">
               <div>
                 <div className="date">{new Date(appt.date).toDateString()} - {appt.time}</div>

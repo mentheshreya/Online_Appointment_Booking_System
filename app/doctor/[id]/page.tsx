@@ -3,29 +3,48 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ThemeToggle from '../../components/ThemeToggle';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-interface Doctor {
-  id: string;
+interface DoctorDetail {
+  _id: string;
   name: string;
-  spec: string;
-  rating: number;
-  reviews: number;
+  specialization: string;
+  experience: number;
   location: string;
+  qualification: string;
 }
-
-const doctors: Doctor[] = [
-  { id: '1', name: 'Dr. Rahul Mehta', spec: 'Cardiologist', rating: 4.9, reviews: 198, location: 'Kothrud' },
-  { id: '2', name: 'Dr. Shravani Kalapure', spec: 'Dentist', rating: 4.1, reviews: 144, location: 'Akurdi' },
-  { id: '3', name: 'Dr. Shreya Menthe', spec: 'Dermatologist', rating: 4.2, reviews: 98, location: 'Pune' },
-  { id: '4', name: 'Dr. Abhishek Singh', spec: 'Gynecologist', rating: 4.9, reviews: 198, location: 'Aundh' },
-];
 
 export default function DoctorProfile({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [selectedSlot, setSelectedSlot] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const doctor = doctors.find((d) => d.id === params.id);
+  const [doctor, setDoctor] = useState<DoctorDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const res = await fetch(`/api/doctors/${params.id}`);
+        if (res.ok) {
+          const doctorData = await res.json();
+          setDoctor(doctorData);
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error(err.message);
+        } else {
+          console.error('Unknown error');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctor();
+  }, [params.id]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading doctor profile...</div>;
+  }
 
   if (!doctor) {
     return (
@@ -89,14 +108,15 @@ export default function DoctorProfile({ params }: { params: { id: string } }) {
           <div className="doc-img">👩‍⚕️</div>
           <div className="profile-info">
             <h3>{doctor.name}</h3>
-            <div className="spec">{doctor.spec}</div>
-            <div className="rating">⭐ {doctor.rating} ({doctor.reviews} reviews)</div>
+            <div className="spec">{doctor.specialization}</div>
+            <div className="rating">{doctor.experience} years experience</div>
             <div className="location">📍 {doctor.location}</div>
+            <div className="qualification">{doctor.qualification}</div>
           </div>
         </div>
         <div className="about-card">
           <h4>About Doctor</h4>
-          <p>Experienced {doctor.spec.toLowerCase()} specializing in patient-centric care and precise diagnostics.</p>
+          <p>{doctor.name} is a highly experienced {doctor.specialization?.toLowerCase()} helping patients with compassionate care and modern treatment plans.</p>
         </div>
         <div className="exp-card">
           <h4>Experience & Details:</h4>

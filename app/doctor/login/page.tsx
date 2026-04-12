@@ -64,6 +64,8 @@ export default function DoctorLogin() {
         .btn-login{display:block;width:100%;background:#fff;border:1.8px solid #a8e6b8;border-radius:999px;padding:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;text-align:center;margin-top:10px;transition:background .15s;text-decoration:none;color:#222;}
         .btn-login:hover{background:#c6f0d0;}
         .forgot{display:inline-block;font-size:.88rem;font-weight:700;text-decoration:underline;color:#222;margin-top:14px;cursor:pointer;}
+        .alt-text{margin-top:14px;text-align:center;font-size:.92rem;color:#444;}
+        .alt-text a{color:#5a1fa0;font-weight:800;text-decoration:none;}
       `}</style>
       <nav>
         <div className="logo-circle">
@@ -96,6 +98,7 @@ export default function DoctorLogin() {
           <button type="submit" className="btn-login">LOGIN</button>
           <br />
           <a className="forgot" href="#">Forgot Password?</a>
+          <p className="alt-text">New here? <Link href="/signup?role=doctor">Sign Up</Link></p>
         </form>
       </div>
       {notifications.map(n => (
