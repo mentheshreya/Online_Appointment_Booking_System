@@ -1,0 +1,14 @@
+{
+  "name": "appointment_booking_system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root project manager for MediSlot",
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "npx concurrently \"npm run dev --prefix frontend\" \"npm start --prefix backend\"",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
